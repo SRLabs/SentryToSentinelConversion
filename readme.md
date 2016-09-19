@@ -4,5 +4,5 @@ This is a sandbox experiment for working out a migration to convert a Cartalyst/
 
 The key results are here: 
 
-- [add_sentinel_schema migration](app/database/migrations/2016_09_19_000103_add_sentinel_schema.php)
-- [remove_sentry_schema migration](app/database/2016_09_19_000113_remove_sentry_schema.php)
+- [add_sentinel_schema migration](https://github.com/SRLabs/SentryToSentinelConversion/blob/master/database/migrations/2016_09_19_000103_add_sentinel_schema.php)
+- [remove_sentry_schema migration](https://github.com/SRLabs/SentryToSentinelConversion/blob/master/database/migrations/2016_09_19_000113_remove_sentry_schema.php)
