@@ -1,5 +1,7 @@
 # Sentry to Sentinel Migration
 
+[![Build Status](https://travis-ci.org/SRLabs/SentryToSentinelConversion.svg?branch=master)](https://travis-ci.org/SRLabs/SentryToSentinelConversion)
+
 This is a sandbox experiment for working out a migration to convert a [Cartalyst/Sentry](https://cartalyst.com/manual/sentry/2.1) schema to a schema that works with [Cartalyst/Sentinel](https://cartalyst.com/manual/sentinel/2.0).
 
 These are the files you are most likely interested in: 
