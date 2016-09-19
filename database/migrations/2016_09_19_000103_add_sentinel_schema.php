@@ -141,6 +141,8 @@ class AddSentinelSchema extends Migration
         Schema::table('throttle', function (Blueprint $table) {
             $table->dropColumn(['type', 'ip']);
         });
+
+        // TODO:  Add code here for restoring groups and group memberships
     }
 
     protected function convertPermissions($permissions)
