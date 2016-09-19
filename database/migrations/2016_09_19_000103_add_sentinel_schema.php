@@ -132,19 +132,69 @@ class AddSentinelSchema extends Migration
      */
     public function down()
     {
+        // Restore the user table data
+        $users = EloquentUser::get();
+        foreach ($users as $user) {
+
+            // Create an activation record
+            if ($activation = Activation::exists($user)) {
+                $user->activated_at = $activation->completed_at;
+                $user->activated = 1;
+            }
+
+            // Convert the user specific permissions
+            $user->permissions = $this->restorePermissions($user->permissions);
+            $user->save();
+        }
+
+        // Convert the roles into
+        $roles = DB::table('roles')->get();
+        $rolepReference = [];
+        foreach($roles as $role) {
+
+            // Create the role
+            $group = Sentry::createGroup(array(
+                'name' => $role->name,
+            ));
+
+            // Convert the permissons
+            $permissions = json_decode($role->permissions);
+            $group->permissions = $this->restorePermissions($permissions);
+            $group->save();
+
+            // Create a lookup to convert the role id to a group id
+            $roleReference[$role->id] = $group->id;
+        }
+
+        // Convert the group memberships
+        $memberships = DB::table('users_groups')->get();
+        foreach($memberships as $membership) {
+            DB::table('role_users')->insert([
+                'user_id' => $membership->user_id,
+                'group_id' => $roleReference[$membership->role_id],
+            ]);
+        }
+
+        // Drop the added throttle columns
+        Schema::table('throttle', function (Blueprint $table) {
+            $table->dropColumn(['type', 'ip']);
+        });
+
+        // Drop the additional Sentinel Tables
         Schema::drop('activations');
         Schema::drop('persistences');
         Schema::drop('reminders');
         Schema::drop('roles');
         Schema::drop('role_users');
-
-        Schema::table('throttle', function (Blueprint $table) {
-            $table->dropColumn(['type', 'ip']);
-        });
-
-        // TODO:  Add code here for restoring groups and group memberships
     }
 
+    /**
+     * Convert Sentry style permission arrays to Sentinel style permission arrays
+     *
+     * @param  $permissions
+     *
+     * @return array
+     */
     protected function convertPermissions($permissions)
     {
         $converted = [];
@@ -153,6 +203,23 @@ class AddSentinelSchema extends Migration
                 $value = 0;
             }
             $converted[$key] = (bool)$value;
+        }
+
+        return $converted;
+    }
+
+    /**
+     * Restore Sentry style permission arrays from Sentinel style permission arrays
+     *
+     * @param  $permissions
+     *
+     * @return array
+     */
+    protected function restorePermissions($permissions)
+    {
+        $converted = [];
+        foreach ($permissions as $key => $value) {
+            $converted[$key] = intval($value);
         }
 
         return $converted;
