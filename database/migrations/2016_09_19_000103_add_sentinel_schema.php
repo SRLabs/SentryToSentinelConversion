@@ -74,8 +74,11 @@ class AddSentinelSchema extends Migration
 
         // Modify the existing throttle table
         Schema::table('throttle', function (Blueprint $table) {
+            // Make the user_id column nullable.
+            $table->integer('user_id')->unsigned()->nullable()->change();
             $table->string('type')->nullable();
             $table->string('ip')->nullable();
+            $table->timestamps();
         });
 
         // Convert user table data as appropriate
@@ -175,9 +178,11 @@ class AddSentinelSchema extends Migration
             ]);
         }
 
-        // Drop the added throttle columns
         Schema::table('throttle', function (Blueprint $table) {
-            $table->dropColumn(['type', 'ip']);
+            // Make the user_id column NOT nullable.
+            $table->integer('user_id')->unsigned()->change();
+            // Drop the added throttle columns
+            $table->dropColumn(['type', 'ip', 'created_at', 'updated_at']);
         });
 
         // Drop the additional Sentinel Tables
